@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>May 2026 AI Money Command Center</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a1a; color: #fff; line-height: 1.5; -webkit-text-size-adjust: 100%; }
+.nav { position: sticky; top: 0; z-index: 50; background: rgba(10,10,26,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.08); overflow-x: auto; white-space: nowrap; padding: 0 8px; }
+.nav button { display: inline-block; padding: 10px 14px; margin: 6px 2px; border: none; border-radius: 8px; background: rgba(255,255,255,0.06); color: #94a3b8; font-size: 13px; font-weight: 600; cursor: pointer; }
+.nav button.active { background: rgba(6,182,212,0.15); color: #22d3ee; border: 1px solid rgba(6,182,212,0.3); }
+.section { display: none; padding: 16px; max-width: 900px; margin: 0 auto; }
+.section.active { display: block; }
+.hero { background: linear-gradient(135deg,#0891b2,#4f46e5,#7c3aed); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+.hero h1 { font-size: 32px; font-weight: 900; margin-bottom: 8px; }
+.hero p { font-size: 15px; opacity: 0.9; margin-bottom: 16px; }
+.badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; margin: 2px; }
+.badge-amber { background: #f59e0b; color: #000; }
+.badge-green { background: #10b981; color: #000; }
+.badge-blue { background: rgba(255,255,255,0.2); color: #fff; }
+.stats { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-top: 16px; }
+.stat { background: rgba(0,0,0,0.25); padding: 12px; border-radius: 12px; text-align: center; }
+.stat .num { font-size: 24px; font-weight: 900; color: #22d3ee; }
+.stat .label { font-size: 11px; opacity: 0.7; }
+.card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+.card h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; color: #22d3ee; }
+.card p, .card li { font-size: 13px; color: #cbd5e1; margin-bottom: 6px; }
+.card ul { padding-left: 18px; }
+.week-header { background: rgba(255,255,255,0.06); border-radius: 10px; padding: 14px; margin-bottom: 10px; cursor: pointer; }
+.week-header h4 { font-size: 15px; font-weight: 800; }
+.week-header .sub { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+.week-header .target { float: right; background: #10b981; color: #000; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+.day { background: rgba(255,255,255,0.03); border-radius: 10px; padding: 12px; margin-bottom: 8px; border-left: 3px solid #0891b2; }
+.day h5 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.day .focus { font-size: 11px; color: #f59e0b; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; }
+.task { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.task input { margin-top: 3px; width: 16px; height: 16px; accent-color: #22d3ee; flex-shrink: 0; }
+.task span { color: #e2e8f0; }
+.task .tool { margin-left: auto; font-size: 10px; color: #a78bfa; background: rgba(167,139,250,0.1); padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+.task.done span { text-decoration: line-through; opacity: 0.5; }
+.revenue-bar { background: rgba(255,255,255,0.06); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+.revenue-bar label { font-size: 13px; color: #94a3b8; }
+.revenue-bar input { width: 100%; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; font-size: 16px; margin: 6px 0; }
+.progress-track { background: rgba(0,0,0,0.3); border-radius: 8px; height: 20px; overflow: hidden; }
+.progress-fill { background: linear-gradient(90deg,#10b981,#22d3ee); height: 100%; border-radius: 8px; transition: width 0.3s; }
+.agent-card { display: flex; gap: 10px; padding: 12px; background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.15); border-radius: 10px; margin-bottom: 8px; }
+.agent-card.manual { background: rgba(245,158,11,0.05); border-color: rgba(245,158,11,0.15); }
+.agent-card .icon { font-size: 20px; }
+.agent-card .info h4 { font-size: 13px; font-weight: 700; }
+.agent-card .info p { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+.agent-card .status { margin-left: auto; font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 700; }
+.status-auto { background: rgba(16,185,129,0.2); color: #34d399; }
+.status-manual { background: rgba(245,158,11,0.2); color: #fbbf24; }
+h2 { font-size: 22px; font-weight: 900; margin-bottom: 12px; }
+h2 .emoji { font-size: 26px; margin-right: 6px; }
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+.compare-box { padding: 12px; border-radius: 10px; text-align: center; }
+.compare-box.red { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); }
+.compare-box.green { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); }
+.compare-box .big { font-size: 22px; font-weight: 900; }
+.script-box { background: rgba(0,0,0,0.2); border-radius: 8px; padding: 12px; margin: 8px 0; font-size: 12px; font-style: italic; color: #cbd5e1; line-height: 1.6; }
+.gold-box { background: linear-gradient(135deg,rgba(245,158,11,0.1),rgba(234,179,8,0.05)); border: 1px solid rgba(245,158,11,0.2); border-radius: 12px; padding: 16px; margin: 12px 0; }
+button.cta { display: block; width: 100%; padding: 14px; background: linear-gradient(135deg,#0891b2,#4f46e5); border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; margin: 16px 0; cursor: pointer; }
+.roadmap-month { background: rgba(255,255,255,0.04); border-radius: 12px; padding: 14px; margin-bottom: 10px; border-left: 3px solid #f59e0b; }
+.roadmap-month h4 { font-size: 14px; font-weight: 800; color: #fbbf24; }
+.roadmap-month .amt { float: right; background: #f59e0b; color: #000; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+.hide { display: none; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <button onclick="show('overview')" class="active">Overview</button>
+  <button onclick="show('auto')">Whats Auto?</button>
+  <button onclick="show('week1')">Week 1</button>
+  <button onclick="show('week2')">Week 2</button>
+  <button onclick="show('week3')">Week 3</button>
+  <button onclick="show('week4')">Week 4</button>
+  <button onclick="show('tools')">Tools</button>
+  <button onclick="show('vapi')">VAPI Scripts</button>
+  <button onclick="show('revenue')">Revenue</button>
+  <button onclick="show('roadmap')">$1M Roadmap</button>
+</div>
+
+<!-- OVERVIEW -->
+<div id="overview" class="section active">
+  <div class="hero">
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+      <span class="badge badge-blue">May 2 - May 31, 2026</span>
+      <span class="badge badge-amber">30 DAY SPRINT</span>
+      <span class="badge badge-green">ALL ALBERTA TRADES</span>
+    </div>
+    <h1>$30,000 in 30 Days</h1>
+    <p>Targeting ALL Alberta trades: Calgary, Edmonton, Red Deer, Lethbridge, Fort McMurray, Medicine Hat. Plumbers, HVAC, electricians, roofers, landscapers, painters, drywallers, concrete, fencing, garage doors — every trade that bleeds leads. VAPI calls. You build. Agents sell.</p>
+    <div class="stats">
+      <div class="stat"><div class="num">30</div><div class="label">Days Left</div></div>
+      <div class="stat"><div class="num">5</div><div class="label">Income Streams</div></div>
+      <div class="stat"><div class="num">$668</div><div class="label">Monthly Tool Cost</div></div>
+      <div class="stat"><div class="num">61x</div><div class="label">ROI vs Humans</div></div>
+    </div>
+  </div>
+
+  <div class="gold-box">
+    <h3 style="color:#fbbf24;margin-bottom:8px;">⚡ Why You Need GoHighLevel + VAPI Together</h3>
+    <p style="font-size:13px;color:#cbd5e1;"><strong style="color:#fff;">VAPI</strong> = voice caller only. Makes calls, books appointments. That's ALL.<br><br>
+    <strong style="color:#fff;">GoHighLevel</strong> = CRM + automation engine + white-label SaaS. Stores leads, runs email/SMS, builds websites, hosts courses, processes payments, lets you rebrand as YOUR software.<br><br>
+    They are <strong style="color:#fbbf24;">MARRIED</strong>. VAPI calls → GHL captures → automations nurture → you close. Without GHL, leads have nowhere to go.</p>
+  </div>
+
+  <div class="card">
+    <h3>🗺️ Alberta-Wide Target: Every Trade, Every City</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
+      <div><strong style="color:#fff;">Calgary Metro</strong><br>Plumbers, HVAC, Electricians, Roofers, Landscapers, Painters, Drywallers, Concrete, Garage Doors, Fencing</div>
+      <div><strong style="color:#fff;">Edmonton Metro</strong><br>Same trades + Fort McMurray. Bigger job sizes.</div>
+      <div><strong style="color:#fff;">Red Deer / Central</strong><br>Less competition. Faster closes. Rural trades desperate.</div>
+      <div><strong style="color:#fff;">Lethbridge / South</strong><br>Agricultural trades, irrigation, farm equipment.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📊 May Targets</h3>
+    <div class="task"><input type="checkbox"><span>AG Automation Clients: <strong>0 / 8</strong></span></div>
+    <div class="task"><input type="checkbox"><span>LeadForge AI Users: <strong>0 / 15</strong></span></div>
+    <div class="task"><input type="checkbox"><span>Course Pre-sales: <strong>0 / 10</strong></span></div>
+    <div class="task"><input type="checkbox"><span>Vibe Coding Projects: <strong>0 / 4</strong></span></div>
+    <div class="task"><input type="checkbox"><span>May Revenue: <strong>$0 / $30,000</strong></span></div>
+  </div>
+</div>
+
+<!-- WHATS AUTO -->
+<div id="auto" class="section">
+  <h2><span class="emoji">🤖</span>Whats Auto vs What YOU Do</h2>
+  <p style="font-size:13px;color:#94a3b8;margin-bottom:16px;">10 agents run 24/7. You do 5 things only a human can.</p>
+
+  <h3 style="font-size:15px;color:#34d399;margin-bottom:10px;">✅ FULLY AUTOMATED — You Touch Nothing</h3>
+  <div class="agent-card"><div class="icon">📞</div><div class="info"><h4>VAPI Cold Caller</h4><p>300 calls/day to Alberta trades</p></div><div class="status status-auto">24/7 AUTO</div></div>
+  <div class="agent-card"><div class="icon">📧</div><div class="info"><h4>Email Outreach Bot</h4><p>200 emails/day via Instantly.ai</p></div><div class="status status-auto">24/7 AUTO</div></div>
+  <div class="agent-card"><div class="icon">🤖</div><div class="info"><h4>Lead Nurture</h4><p>Auto-follows every lead 30 days</p></div><div class="status status-auto">24/7 AUTO</div></div>
+  <div class="agent-card"><div class="icon">✍️</div><div class="info"><h4>Content Factory</h4><p>1 Loom → 5 social posts auto</p></div><div class="status status-auto">5 MIN/WEEK</div></div>
+  <div class="agent-card"><div class="icon">🎉</div><div class="info"><h4>Client Onboarding</h4><p>Payment → welcome → kickoff auto</p></div><div class="status status-auto">24/7 AUTO</div></div>
+  <div class="agent-card"><div class="icon">📊</div><div class="info"><h4>Monthly Reports</h4><p>Data → PDF → email on 1st auto</p></div><div class="status status-auto">24/7 AUTO</div></div>
+  <div class="agent-card"><div class="icon">⭐</div><div class="info"><h4>Review Requester</h4><p>Day 30 auto-asks for Google review</p></div><div class="status status-auto">24/7 AUTO</div></div>
+  <div class="agent-card"><div class="icon">💎</div><div class="info"><h4>Referral Engine</h4><p>Day 45 auto-asks for referrals</p></div><div class="status status-auto">24/7 AUTO</div></div>
+  <div class="agent-card"><div class="icon">💬</div><div class="info"><h4>Website Chatbot</h4><p>Answers, qualifies, books 24/7</p></div><div class="status status-auto">24/7 AUTO</div></div>
+
+  <h3 style="font-size:15px;color:#fbbf24;margin:20px 0 10px;">👤 YOU DO THESE — No Bot Can Replace</h3>
+  <div class="agent-card manual"><div class="icon">🤝</div><div class="info"><h4>Sales Calls (Closing)</h4><p>No bot closes a $3K deal. Trust requires human conversation. 1-2 hrs/day</p></div><div class="status status-manual">YOU</div></div>
+  <div class="agent-card manual"><div class="icon">💻</div><div class="info"><h4>Vibecoding</h4><p>You guide Lovable/Cursor. 3-4 hrs/day deep work.</p></div><div class="status status-manual">YOU</div></div>
+  <div class="agent-card manual"><div class="icon">🎓</div><div class="info"><h4>Client Delivery Calls</h4><p>Training needs human presence. 30-60 min per delivery.</p></div><div class="status status-manual">YOU</div></div>
+  <div class="agent-card manual"><div class="icon">💰</div><div class="info"><h4>Price Negotiation</h4><p>Bots leave money on table. You anchor high. 15-30 min.</p></div><div class="status status-manual">YOU</div></div>
+  <div class="agent-card manual"><div class="icon">🧠</div><div class="info"><h4>Weekly Strategy</h4><p>AI can't set strategy. You decide what to kill/build. 30 min/day.</p></div><div class="status status-manual">YOU</div></div>
+
+  <div class="card" style="margin-top:16px;">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center;">
+      <div><div style="font-size:24px;font-weight:900;color:#34d399;">~6 hrs</div><div style="font-size:11px;color:#94a3b8;">Automated/day</div></div>
+      <div><div style="font-size:24px;font-weight:900;color:#fbbf24;">~5 hrs</div><div style="font-size:11px;color:#94a3b8;">Your manual/day</div></div>
+      <div><div style="font-size:24px;font-weight:900;color:#fff;">52 hrs</div><div style="font-size:11px;color:#94a3b8;">Total/week focused</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK 1 -->
+<div id="week1" class="section">
+  <h2><span class="emoji">📅</span>Week 1: Foundation Blitz</h2>
+  <div class="week-header"><div class="target">$5,000 Target</div><h4>May 2-8: Fix Site + Launch Outreach + First Client</h4><div class="sub">VAPI setup, GHL setup, 3 demos, first close</div></div>
+
+  <div class="day"><div class="focus">Saturday May 2</div><h5>WEBSITE FIX + SETUP</h5>
+    <div class="task"><input type="checkbox"><span>Add 3-tier pricing ($1,997 / $2,997 / $4,997)</span><span class="tool">Lovable</span></div>
+    <div class="task"><input type="checkbox"><span>Replace "pay if love it" with 50/50 terms</span><span class="tool">Lovable</span></div>
+    <div class="task"><input type="checkbox"><span>Set up hello@agautomation.ca</span><span class="tool">Google</span></div>
+    <div class="task"><input type="checkbox"><span>Rewrite headline for ALL Alberta trades</span><span class="tool">Claude</span></div>
+    <div class="task"><input type="checkbox"><span>Sign up VAPI.ai + create voice agent</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Sign up GoHighLevel Agency ($297/mo)</span><span class="tool">GHL</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Sunday May 3</div><h5>BUILD YOUR ARMY</h5>
+    <div class="task"><input type="checkbox"><span>Create VAPI voice agent (script + persona)</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Set up Instantly.ai ($37/mo)</span><span class="tool">Instantly</span></div>
+    <div class="task"><input type="checkbox"><span>Build list of 200 Alberta trades (all cities)</span><span class="tool">Apollo</span></div>
+    <div class="task"><input type="checkbox"><span>Find 100 decision-maker emails</span><span class="tool">Apollo</span></div>
+    <div class="task"><input type="checkbox"><span>Write 5 cold email templates</span><span class="tool">Claude</span></div>
+    <div class="task"><input type="checkbox"><span>Make.com: New lead → CRM → Email</span><span class="tool">Make</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Monday May 4</div><h5>DEMOS + OUTREACH</h5>
+    <div class="task"><input type="checkbox"><span>Build 5 demo lead-capture pages</span><span class="tool">Lovable</span></div>
+    <div class="task"><input type="checkbox"><span>Record 3 Loom demos</span><span class="tool">Loom</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 50 cold calls to Alberta trades</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Send 50 cold emails via Instantly</span><span class="tool">Instantly</span></div>
+    <div class="task"><input type="checkbox"><span>Post in 5 Alberta Facebook groups</span><span class="tool">Facebook</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Tuesday May 5</div><h5>SELL SELL SELL — $2,500 TARGET</h5>
+    <div class="task"><input type="checkbox"><span>Run 5 free AI audits (15-min calls)</span><span class="tool">Calendly</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 50 follow-up calls</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Send 50 more cold emails</span><span class="tool">Instantly</span></div>
+    <div class="task"><input type="checkbox"><span>Send proposals to 3 prospects</span><span class="tool">Bonsai</span></div>
+    <div class="task"><input type="checkbox"><span>Post case study on LinkedIn</span><span class="tool">LinkedIn</span></div>
+    <div class="task"><input type="checkbox"><span>Start LeadForge AI landing page</span><span class="tool">Lovable</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Wednesday May 6</div><h5>CLOSE FIRST CLIENT — $2,500 TARGET</h5>
+    <div class="task"><input type="checkbox"><span><strong>CLOSE CLIENT #1</strong> — $2,500 setup + $497/mo</span><span class="tool">Bonsai</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 50 follow-up calls</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Build client #1 automation</span><span class="tool">GHL</span></div>
+    <div class="task"><input type="checkbox"><span>LeadForge AI: finish landing page</span><span class="tool">Lovable</span></div>
+    <div class="task"><input type="checkbox"><span>Record onboarding training video</span><span class="tool">Loom</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Thursday May 7</div><h5>VAPI SCALING</h5>
+    <div class="task"><input type="checkbox"><span>VAPI: 100 calls (scale up)</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Deliver client #1 + training call</span><span class="tool">GHL</span></div>
+    <div class="task"><input type="checkbox"><span>Get video testimonial from client #1</span><span class="tool">Phone</span></div>
+    <div class="task"><input type="checkbox"><span>Launch LeadForge AI beta (free for 5)</span><span class="tool">Lovable</span></div>
+    <div class="task"><input type="checkbox"><span>Make.com: Payment → Onboarding auto</span><span class="tool">Make</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Friday May 8</div><h5>REVIEW + SCALE — $2,500 TARGET</h5>
+    <div class="task"><input type="checkbox"><span>Review Week 1 metrics</span><span class="tool">Sheets</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 100 calls</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Close client #2</span><span class="tool">Bonsai</span></div>
+    <div class="task"><input type="checkbox"><span>Write 3 LinkedIn posts</span><span class="tool">Claude</span></div>
+    <div class="task"><input type="checkbox"><span>Optimize VAPI scripts</span><span class="tool">VAPI</span></div>
+  </div>
+</div>
+
+<!-- WEEK 2 -->
+<div id="week2" class="section">
+  <h2><span class="emoji">📅</span>Week 2: Product Launch + More Clients</h2>
+  <div class="week-header"><div class="target">$8,000 Target</div><h4>May 9-15: LeadForge Ships + Course Outline + 2 More Clients</h4></div>
+
+  <div class="day"><div class="focus">Saturday May 9</div><h5>LEADFORGE BUILD</h5>
+    <div class="task"><input type="checkbox"><span>Build missed call text-back in GHL</span><span class="tool">GHL</span></div>
+    <div class="task"><input type="checkbox"><span>Build AI review response (Claude API)</span><span class="tool">Claude</span></div>
+    <div class="task"><input type="checkbox"><span>Create 10 pre-built templates</span><span class="tool">GHL</span></div>
+    <div class="task"><input type="checkbox"><span>Stripe billing: 3 tiers ($97/$197/$497)</span><span class="tool">Stripe</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 100 calls</span><span class="tool">VAPI</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Sunday May 10</div><h5>COURSE CREATION</h5>
+    <div class="task"><input type="checkbox"><span>Outline complete 8-module course</span><span class="tool">Claude</span></div>
+    <div class="task"><input type="checkbox"><span>Record Module 1: The Lead Crisis</span><span class="tool">Loom</span></div>
+    <div class="task"><input type="checkbox"><span>Record Module 2: Google Profile Domination</span><span class="tool">Loom</span></div>
+    <div class="task"><input type="checkbox"><span>Create course landing page on Gumroad</span><span class="tool">Gumroad</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 100 calls</span><span class="tool">VAPI</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Monday May 11</div><h5>LAUNCH DAY — $2,500 TARGET</h5>
+    <div class="task"><input type="checkbox"><span>Launch LeadForge AI on Product Hunt</span><span class="tool">ProductHunt</span></div>
+    <div class="task"><input type="checkbox"><span>Post launch on LinkedIn/Twitter/Reddit</span><span class="tool">Social</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 100 calls</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Send 100 cold emails</span><span class="tool">Instantly</span></div>
+    <div class="task"><input type="checkbox"><span>Close 1 client from audits</span><span class="tool">Bonsai</span></div>
+    <div class="task"><input type="checkbox"><span>Deliver client #2 system</span><span class="tool">GHL</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Tuesday May 12</div><h5>VIBE CODING — $5,000 TARGET</h5>
+    <div class="task"><input type="checkbox"><span>Close first VIBE CODING project ($5,000+)</span><span class="tool">Bonsai</span></div>
+    <div class="task"><input type="checkbox"><span>Build custom AI chatbot for client</span><span class="tool">Lovable</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 100 follow-up calls</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Post Week 2 case study</span><span class="tool">LinkedIn</span></div>
+    <div class="task"><input type="checkbox"><span>Record Module 3: Missed Call Money</span><span class="tool">Loom</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Wednesday May 13</div><h5>GHL WHITE-LABEL</h5>
+    <div class="task"><input type="checkbox"><span>Upgrade GHL to SaaS Pro ($497/mo)</span><span class="tool">GHL</span></div>
+    <div class="task"><input type="checkbox"><span>Configure white-label branding</span><span class="tool">GHL</span></div>
+    <div class="task"><input type="checkbox"><span>Offer white-label to 3 best clients ($147/mo)</span><span class="tool">Email</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 100 calls</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Deliver vibe coding project + testimonial</span><span class="tool">Loom</span></div>
+    <div class="task"><input type="checkbox"><span>Record Module 4: AI Chatbots</span><span class="tool">Loom</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Thursday May 14</div><h5>CONTENT MACHINE — $2,500 TARGET</h5>
+    <div class="task"><input type="checkbox"><span>Create content automation workflow</span><span class="tool">Make</span></div>
+    <div class="task"><input type="checkbox"><span>Write 5 blog posts for SEO</span><span class="tool">Claude</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 100 calls fresh prospects</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Close client #4</span><span class="tool">Bonsai</span></div>
+    <div class="task"><input type="checkbox"><span>Create template products on Gumroad</span><span class="tool">Canva</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Friday May 15</div><h5>SCALE CHECK — $2,500 TARGET</h5>
+    <div class="task"><input type="checkbox"><span>Week 2 review: metrics, optimize VAPI</span><span class="tool">Sheets</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 150 calls (scaled volume)</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Close client #5</span><span class="tool">Bonsai</span></div>
+    <div class="task"><input type="checkbox"><span>Schedule 2 weeks LinkedIn content</span><span class="tool">Buffer</span></div>
+    <div class="task"><input type="checkbox"><span>LeadForge: convert beta to paid</span><span class="tool">Stripe</span></div>
+  </div>
+</div>
+
+<!-- WEEK 3 -->
+<div id="week3" class="section">
+  <h2><span class="emoji">📅</span>Week 3: Cash Infusion</h2>
+  <div class="week-header"><div class="target">$10,000 Target</div><h4>May 16-22: Course Launches + More Vibe Coding + White-Label Subs</h4></div>
+
+  <div class="day"><div class="focus">Saturday May 16</div><h5>COURSE LAUNCH — $2,500 TARGET</h5>
+    <div class="task"><input type="checkbox"><span>Launch course on Gumroad ($497 early bird)</span><span class="tool">Gumroad</span></div>
+    <div class="task"><input type="checkbox"><span>Email blast to all leads (500+ contacts)</span><span class="tool">Email</span></div>
+    <div class="task"><input type="checkbox"><span>Post course launch on social</span><span class="tool">Social</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 150 calls</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Record Modules 5-6</span><span class="tool">Loom</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Sunday May 17</div><h5>VIBE CODING DELIVERY — $7,500 TARGET</h5>
+    <div class="task"><input type="checkbox"><span>Deliver second vibe coding ($7,500)</span><span class="tool">Lovable</span></div>
+    <div class="task"><input type="checkbox"><span>Close third vibe project ($10,000)</span><span class="tool">Bonsai</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 150 calls</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Write case study: "40% more leads"</span><span class="tool">Claude</span></div>
+    <div class="task"><input type="checkbox"><span>Create vibe coding sales page</span><span class="tool">Lovable</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Monday May 18</div><h5>SALES BLITZ — $5,000 TARGET</h5>
+    <div class="task"><input type="checkbox"><span>VAPI: 200 calls (max volume)</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Close client #6 + #7 (dual close)</span><span class="tool">Bonsai</span></div>
+    <div class="task"><input type="checkbox"><span>Send 150 cold emails</span><span class="tool">Instantly</span></div>
+    <div class="task"><input type="checkbox"><span>Post daily LinkedIn content</span><span class="tool">Buffer</span></div>
+    <div class="task"><input type="checkbox"><span>Run 5 AI audits</span><span class="tool">Calendly</span></div>
+    <div class="task"><input type="checkbox"><span>LeadForge: target 10 paying customers</span><span class="tool">Stripe</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Tuesday May 19</div><h5>WHITE-LABEL PIVOT — $2,500 TARGET</h5>
+    <div class="task"><input type="checkbox"><span>Convert 5 AG clients to white-label ($197/mo)</span><span class="tool">Stripe</span></div>
+    <div class="task"><input type="checkbox"><span>Create white-label onboarding video</span><span class="tool">Loom</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 200 calls</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Deliver vibe coding project #3</span><span class="tool">Lovable</span></div>
+    <div class="task"><input type="checkbox"><span>Set up affiliate payouts</span><span class="tool">Gumroad</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Wednesday May 20</div><h5>AUTOMATION DAY</h5>
+    <div class="task"><input type="checkbox"><span>Build monthly report auto (Make + Claude)</span><span class="tool">Make</span></div>
+    <div class="task"><input type="checkbox"><span>Automate content: 1 Loom → 5 posts</span><span class="tool">Make</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 200 calls</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Auto review request (30 days post)</span><span class="tool">GHL</span></div>
+    <div class="task"><input type="checkbox"><span>Referral automation: refer = free month</span><span class="tool">GHL</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Thursday May 21</div><h5>PARTNERSHIPS — $2,500 TARGET</h5>
+    <div class="task"><input type="checkbox"><span>Reach out to 10 trades associations</span><span class="tool">Claude</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 200 calls</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Close client #8</span><span class="tool">Bonsai</span></div>
+    <div class="task"><input type="checkbox"><span>Post partnership offer: 30% commission</span><span class="tool">LinkedIn</span></div>
+    <div class="task"><input type="checkbox"><span>Record Module 7 + 8 (final)</span><span class="tool">Loom</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Friday May 22</div><h5>WEEK 3 REVIEW</h5>
+    <div class="task"><input type="checkbox"><span>Review all metrics</span><span class="tool">Sheets</span></div>
+    <div class="task"><input type="checkbox"><span>Optimize VAPI scripts</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 200 calls</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Launch paid ads ($500/week Facebook)</span><span class="tool">Facebook</span></div>
+    <div class="task"><input type="checkbox"><span>Plan Week 4 sprint</span><span class="tool">Notion</span></div>
+  </div>
+</div>
+
+<!-- WEEK 4 -->
+<div id="week4" class="section">
+  <h2><span class="emoji">📅</span>Week 4: $30K Sprint Finish</h2>
+  <div class="week-header"><div class="target">$7,000 Target</div><h4>May 23-29: Close Gap + Hit $30K + Set June for $50K</h4></div>
+
+  <div class="day"><div class="focus">Saturday May 23</div><h5>FINAL PUSH — $5,000 TARGET</h5>
+    <div class="task"><input type="checkbox"><span>VAPI: 250 calls (all-out blitz)</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Close client #9</span><span class="tool">Bonsai</span></div>
+    <div class="task"><input type="checkbox"><span>Send 200 cold emails</span><span class="tool">Instantly</span></div>
+    <div class="task"><input type="checkbox"><span>Course: Launch cohort #1 (8 @ $997)</span><span class="tool">Gumroad</span></div>
+    <div class="task"><input type="checkbox"><span>Create "last chance" May pricing</span><span class="tool">Claude</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Sunday May 24</div><h5>COURSE COHORT — $2,500 TARGET</h5>
+    <div class="task"><input type="checkbox"><span>Run Course Cohort #1 Live Call #1</span><span class="tool">Zoom</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 250 calls</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Close client #10</span><span class="tool">Bonsai</span></div>
+    <div class="task"><input type="checkbox"><span>Deliver final vibe project for May</span><span class="tool">Lovable</span></div>
+    <div class="task"><input type="checkbox"><span>Post student win on LinkedIn</span><span class="tool">LinkedIn</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Monday May 25</div><h5>ALL-OUT CLOSE — $5,000 TARGET</h5>
+    <div class="task"><input type="checkbox"><span>VAPI: 300 calls (peak volume)</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Close client #11 + #12</span><span class="tool">Bonsai</span></div>
+    <div class="task"><input type="checkbox"><span>Send final-week email blast</span><span class="tool">Instantly</span></div>
+    <div class="task"><input type="checkbox"><span>Upsell existing clients to higher tiers</span><span class="tool">Email</span></div>
+    <div class="task"><input type="checkbox"><span>LeadForge: push for 15 customers</span><span class="tool">Stripe</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Tuesday May 26</div><h5>GAP ANALYSIS</h5>
+    <div class="task"><input type="checkbox"><span>Calculate exact gap to $30K</span><span class="tool">Sheets</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 300 calls to hot prospects</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Offer limited-time "May special"</span><span class="tool">Email</span></div>
+    <div class="task"><input type="checkbox"><span>Reach out to all past no-shows</span><span class="tool">Instantly</span></div>
+    <div class="task"><input type="checkbox"><span>Post urgency: "3 days left"</span><span class="tool">LinkedIn</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Wednesday May 27</div><h5>FINAL CLOSE — $5,000 TARGET</h5>
+    <div class="task"><input type="checkbox"><span>VAPI: 300 calls (every prospect)</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Close final clients to hit $30K</span><span class="tool">Bonsai</span></div>
+    <div class="task"><input type="checkbox"><span>Course Cohort #1 Live Call #2</span><span class="tool">Zoom</span></div>
+    <div class="task"><input type="checkbox"><span>Collect all May testimonials</span><span class="tool">Loom</span></div>
+    <div class="task"><input type="checkbox"><span>Write "Month 1 Results" case study</span><span class="tool">Claude</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Thursday May 28</div><h5>$30K TARGET DAY — $5,000 TARGET</h5>
+    <div class="task"><input type="checkbox"><span><strong>FINAL PUSH: Whatever it takes</strong></span><span class="tool">ALL</span></div>
+    <div class="task"><input type="checkbox"><span>VAPI: 300 calls</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Emergency offers to hot leads</span><span class="tool">Phone</span></div>
+    <div class="task"><input type="checkbox"><span>Announce $30K milestone</span><span class="tool">LinkedIn</span></div>
+    <div class="task"><input type="checkbox"><span>Celebrate the win</span><span class="tool">YOU</span></div>
+  </div>
+
+  <div class="day"><div class="focus">Friday May 29</div><h5>JUNE PLANNING</h5>
+    <div class="task"><input type="checkbox"><span>Full May retrospective</span><span class="tool">Notion</span></div>
+    <div class="task"><input type="checkbox"><span>Set June target: $50,000</span><span class="tool">Sheets</span></div>
+    <div class="task"><input type="checkbox"><span>Plan June projects and launches</span><span class="tool">Notion</span></div>
+    <div class="task"><input type="checkbox"><span>Scale VAPI: upgrade for 1000+/day</span><span class="tool">VAPI</span></div>
+    <div class="task"><input type="checkbox"><span>Weekend rest + recharge</span><span class="tool">LIFE</span></div>
+  </div>
+</div>
+
+<!-- TOOLS -->
+<div id="tools" class="section">
+  <h2><span class="emoji">🛠️</span>Your Tool Army ($668/month)</h2>
+  <div class="card">
+    <h3>📞 Voice Caller</h3>
+    <p><strong>VAPI.ai</strong> — $50-200/mo — AI voice agent: 300 calls/day</p>
+    <p><strong>Twilio</strong> — $0.0085/min — Phone numbers for agents</p>
+  </div>
+  <div class="card">
+    <h3>💻 Vibecoder Build</h3>
+    <p><strong>Lovable</strong> — $25/mo — Full-stack apps, landing pages</p>
+    <p><strong>Cursor</strong> — $20/mo — Complex logic, API integrations</p>
+    <p><strong>Vercel</strong> — $20/mo — Deploy everything</p>
+  </div>
+  <div class="card">
+    <h3>⚙️ Automation Engine</h3>
+    <p><strong>GoHighLevel</strong> — $297/mo — CRM + automations + white-label SaaS</p>
+    <p><strong>Make.com</strong> — $16/mo — Connect all tools, build workflows</p>
+    <p><strong>n8n</strong> — $20/mo — Advanced automation, self-hosted</p>
+  </div>
+  <div class="card">
+    <h3>📧 Sales + Outreach</h3>
+    <p><strong>Instantly.ai</strong> — $37/mo — Cold email sequences</p>
+    <p><strong>Apollo.io</strong> — $59/mo — Find decision-maker emails</p>
+    <p><strong>Bonsai</strong> — $9/mo — Proposals, contracts, invoicing</p>
+    <p><strong>Stripe</strong> — 2.9% — Payments for everything</p>
+  </div>
+  <div class="card">
+    <h3>✍️ Content + Marketing</h3>
+    <p><strong>Claude Pro</strong> — $20/mo — Write everything</p>
+    <p><strong>Canva Pro</strong> — $13/mo — Design everything</p>
+    <p><strong>Buffer</strong> — $6/mo — Schedule social</p>
+  </div>
+  <div class="card">
+    <h3>📦 Products</h3>
+    <p><strong>Gumroad</strong> — 10% fee — Sell course + templates</p>
+    <p><strong>Google Workspace</strong> — $7/mo — Professional email</p>
+  </div>
+</div>
+
+<!-- VAPI SCRIPTS -->
+<div id="vapi" class="section">
+  <h2><span class="emoji">🤖</span>VAPI Scripts (Copy-Paste)</h2>
+
+  <div class="compare">
+    <div class="compare-box red"><div class="big">$4,500</div><div style="font-size:11px;">Human SDR/mo</div></div>
+    <div class="compare-box green"><div class="big">$200</div><div style="font-size:11px;">VAPI Agent/mo</div></div>
+  </div>
+  <div class="gold-box" style="text-align:center;">
+    <div style="font-size:28px;font-weight:900;color:#fbbf24;">22.5x CHEAPER</div>
+    <div style="font-size:13px;">300 calls/day = 9,000/mo = 450 leads = 45 clients</div>
+  </div>
+
+  <div class="card">
+    <h3>Script 1: Cold Introduction</h3>
+    <div class="script-box">Hi, this is [AGENT] from AG Automation. I am calling Alberta [trade] businesses today because most are losing 30 to 40 percent of their leads to missed calls and slow follow-up. We built an AI system that automatically texts back missed callers within 60 seconds and books appointments while you work. One local plumber recovered 8 extra jobs per week using our system. Can I send you a quick 2-minute video showing how it works? What is your email?</div>
+    <p style="font-size:11px;color:#fbbf24;">Goal: Get email. Fallback: Can I at least email you the info?</p>
+  </div>
+
+  <div class="card">
+    <h3>Script 2: Follow-Up (48hrs later)</h3>
+    <div class="script-box">Hi [NAME], this is [AGENT] following up from AG Automation. I sent you a video a couple days ago about our AI lead recovery system for [trade] businesses. Did you get a chance to watch it? If yes, what did you think? Would it help with the missed calls you mentioned? If no, the short version is: our system captures every missed call, texts back instantly, and books appointments automatically. Most clients see results in the first week. Would you be open to a free 15-minute AI audit where I show you exactly how many leads you are losing?</div>
+    <p style="font-size:11px;color:#fbbf24;">Goal: Book AI audit. Fallback: Can I call back next week?</p>
+  </div>
+
+  <div class="card">
+    <h3>Script 3: Audit Booking</h3>
+    <div class="script-box">Perfect! The AI audit takes just 15 minutes. I will ask you 3 quick questions about your current lead flow, then show you exactly how our system would work for your business. We have slots available Tuesday at 2pm or Wednesday at 10am. Which works better for you? I will send you a calendar link right after this call. Also, just so you know, the audit is completely free, and you will walk away with at least 3 actionable tips to improve your lead capture, even if you do not work with us.</div>
+    <p style="font-size:11px;color:#fbbf24;">Goal: Confirm calendar booking.</p>
+  </div>
+
+  <div class="card">
+    <h3>Script 4: Close Deal</h3>
+    <div class="script-box">Based on the audit, you are losing about X leads per week to missed calls. At your average job value of $Y, that is approximately $Z per month walking out the door. Our Lead Recovery System captures 40 percent of those lost leads for $497 per month. That is an investment of $497 to recover roughly 40% of that in monthly revenue. Does that math make sense for your business? If yes, great! I can have you set up within 5 business days. The setup fee is $2,997, and we do 50 percent upfront, 50 percent on delivery. Shall I send over the agreement now?</div>
+    <p style="font-size:11px;color:#fbbf24;">Goal: Close on the spot.</p>
+  </div>
+
+  <div class="card">
+    <h3>Script 5: Referral</h3>
+    <div class="script-box">Hi [NAME], great news — your lead capture system is now recovering X leads per week! I wanted to ask: do you know any other [trade] business owners in Alberta who might be struggling with missed calls? I am offering my existing clients a free month of service for every referral who signs up. It is a great way to help a friend while saving on your own service. Anyone come to mind?</div>
+    <p style="font-size:11px;color:#fbbf24;">Goal: Get referral name + number.</p>
+  </div>
+
+  <h3 style="margin-top:20px;">7-Step VAPI Setup</h3>
+  <div class="task"><span>1. Create VAPI account ($50 credit)</span><span class="tool">5 min</span></div>
+  <div class="task"><span>2. Buy Twilio Calgary number ($1/mo)</span><span class="tool">10 min</span></div>
+  <div class="task"><span>3. Create first agent (voice + persona)</span><span class="tool">15 min</span></div>
+  <div class="task"><span>4. Upload all 5 scripts</span><span class="tool">30 min</span></div>
+  <div class="task"><span>5. Connect to leads (Apollo CSV)</span><span class="tool">20 min</span></div>
+  <div class="task"><span>6. Test 10 calls, refine, iterate</span><span class="tool">1 hr</span></div>
+  <div class="task"><span>7. SCALE: 100/day Week 1 → 300/day Week 3+</span><span class="tool">ONGOING</span></div>
+</div>
+
+<!-- REVENUE -->
+<div id="revenue" class="section">
+  <h2><span class="emoji">💰</span>May Revenue Calculator</h2>
+  <div class="revenue-bar">
+    <label>AG Automation Setup Fees</label>
+    <input type="number" id="agSetup" placeholder="How many clients? (x $2,500)" oninput="calc()">
+  </div>
+  <div class="revenue-bar">
+    <label>AG Retainers (clients x $497/mo)</label>
+    <input type="number" id="agRet" placeholder="How many retainer clients?" oninput="calc()">
+  </div>
+  <div class="revenue-bar">
+    <label>LeadForge AI Users (x $97/mo)</label>
+    <input type="number" id="lfUsers" placeholder="How many paying users?" oninput="calc()">
+  </div>
+  <div class="revenue-bar">
+    <label>Course Sales (x $497)</label>
+    <input type="number" id="course" placeholder="How many course sales?" oninput="calc()">
+  </div>
+  <div class="revenue-bar">
+    <label>Vibe Coding Projects (x $5,000 avg)</label>
+    <input type="number" id="vibe" placeholder="How many projects?" oninput="calc()">
+  </div>
+  <div class="revenue-bar">
+    <label>Templates + Digital (x $149 avg)</label>
+    <input type="number" id="tmpl" placeholder="How many sales?" oninput="calc()">
+  </div>
+  <div class="revenue-bar">
+    <label>GHL White-Label (x $197/mo)</label>
+    <input type="number" id="ghl" placeholder="How many subscribers?" oninput="calc()">
+  </div>
+
+  <div class="card" style="background:linear-gradient(135deg,#059669,#0d9488);">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:12px;opacity:0.8;">Total May Revenue</div>
+        <div id="totalRev" style="font-size:36px;font-weight:900;">$0</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:12px;opacity:0.8;">Target</div>
+        <div style="font-size:24px;font-weight:700;">$30,000</div>
+      </div>
+    </div>
+    <div class="progress-track" style="margin-top:12px;">
+      <div id="progressBar" class="progress-fill" style="width:0%"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12px;">
+      <span id="pctText">0% to goal</span>
+      <span id="remainText">$30,000 remaining</span>
+    </div>
+  </div>
+</div>
+
+<!-- ROADMAP -->
+<div id="roadmap" class="section">
+  <h2><span class="emoji">🏆</span>$1M by December 2026</h2>
+
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;">
+    <div class="card" style="background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.2);"><div style="font-size:11px;color:#f87171;">Conservative (20%)</div><div style="font-size:22px;font-weight:900;">$300K</div></div>
+    <div class="card" style="background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.2);"><div style="font-size:11px;color:#fbbf24;">Realistic (30%)</div><div style="font-size:22px;font-weight:900;">$550K</div></div>
+    <div class="card" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.2);"><div style="font-size:11px;color:#34d399;">Aggressive (30%)</div><div style="font-size:22px;font-weight:900;">$793K</div></div>
+    <div class="card" style="background:rgba(6,182,212,0.1);border-color:rgba(6,182,212,0.2);"><div style="font-size:11px;color:#22d3ee;">Viral Hit (15%)</div><div style="font-size:22px;font-weight:900;">$1.09M</div></div>
+  </div>
+
+  <div class="roadmap-month"><div class="amt">$30K</div><h4>May 2026 — $30K SPRINT</h4><p style="font-size:12px;color:#94a3b8;">8 AG clients, LeadForge launched, VAPI 300/day, course live</p></div>
+  <div class="roadmap-month"><div class="amt">$50K</div><h4>June 2026 — $50K SCALE</h4><p style="font-size:12px;color:#94a3b8;">Product Hunt, 20 LeadForge users, 10 course sales, white-label beta</p></div>
+  <div class="roadmap-month"><div class="amt">$70K</div><h4>July 2026 — $70K COMPOUND</h4><p style="font-size:12px;color:#94a3b8;">Partnerships, SEO ranking, referral program, 55 LeadForge users</p></div>
+  <div class="roadmap-month"><div class="amt">$100K</div><h4>August 2026 — $100K ACCELERATION</h4><p style="font-size:12px;color:#94a3b8;">Paid ads scaling, enterprise tier, corporate training, 95 users</p></div>
+  <div class="roadmap-month"><div class="amt">$130K</div><h4>September 2026 — $130K VIRAL POTENTIAL</h4><p style="font-size:12px;color:#94a3b8;">Annual plans, price increases, 140 LeadForge users, $40K MRR</p></div>
+  <div class="roadmap-month"><div class="amt">$175K</div><h4>October 2026 — $175K OPTIMIZE</h4><p style="font-size:12px;color:#94a3b8;">Black Friday prep, annual prepay, 200 users, 50 white-label</p></div>
+  <div class="roadmap-month"><div class="amt">$215K</div><h4>November 2026 — $215K HARVEST</h4><p style="font-size:12px;color:#94a3b8;">Black Friday bonanza, 250 users, 65 white-label, $50K MRR</p></div>
+  <div class="roadmap-month" style="border-left-color:#fbbf24;background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(234,179,8,0.05));"><div class="amt">$300K</div><h4>December 2026 — $300K MILLIONAIRE FINISH</h4><p style="font-size:12px;color:#94a3b8;">300 LeadForge users, 80 white-label, $65K MRR, <strong style="color:#fbbf24;">$1.07M TOTAL</strong></p></div>
+
+  <div class="gold-box" style="text-align:center;">
+    <div style="font-size:32px;font-weight:900;color:#fbbf24;">$1,070,000</div>
+    <div style="font-size:14px;color:#cbd5e1;">45% probability of $500K+. 20% probability of $1M+. The only variable is YOU executing.</div>
+  </div>
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+function calc() {
+  const ag = (parseInt(document.getElementById('agSetup').value)||0) * 2500;
+  const agr = (parseInt(document.getElementById('agRet').value)||0) * 497;
+  const lf = (parseInt(document.getElementById('lfUsers').value)||0) * 97;
+  const cs = (parseInt(document.getElementById('course').value)||0) * 497;
+  const vb = (parseInt(document.getElementById('vibe').value)||0) * 5000;
+  const tm = (parseInt(document.getElementById('tmpl').value)||0) * 149;
+  const gw = (parseInt(document.getElementById('ghl').value)||0) * 197;
+  const total = ag + agr + lf + cs + vb + tm + gw;
+  const pct = Math.min((total/30000)*100,100);
+  document.getElementById('totalRev').textContent = '$' + total.toLocaleString();
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('pctText').textContent = pct.toFixed(0) + '% to goal';
+  document.getElementById('remainText').textContent = '$' + Math.max(30000-total,0).toLocaleString() + ' remaining';
+}
+// Checkbox persistence
+document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+  cb.addEventListener('change', function() {
+    this.parentElement.classList.toggle('done', this.checked);
+  });
+});
+</script>
+
+</body>
+</html>
