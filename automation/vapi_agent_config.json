@@ -1,0 +1,80 @@
+{
+  "agent_name": "AG Alberta Trades Caller",
+  "voice": {
+    "provider": "11labs",
+    "voice_id": "Josh",
+    "stability": 0.5,
+    "similarity_boost": 0.75
+  },
+  "language": "en-CA",
+  "model": "gpt-4o-mini",
+  "first_message": "Hi, this is {{agent_name}} from AG Automation. I help Alberta trades businesses capture leads they're losing to missed calls. Do you have 30 seconds?",
+  "system_prompt": "You are a friendly, professional sales development representative for AG Automation, an AI automation agency that helps Alberta trades businesses (plumbers, HVAC, electricians, roofers, landscapers, painters, drywallers, concrete, fencing, garage doors) recover lost leads.\n\nYour job is to:\n1. Briefly introduce AG Automation\n2. Identify if they struggle with missed calls/slow follow-up\n3. If interested: get their email and permission to send a 2-minute video + book a free 15-minute AI audit\n4. If not interested: be polite, ask for email anyway to \"send info they can review when convenient\"\n5. Never be pushy. One soft follow-up question max.\n\nRules:\n- Always mention you're calling Alberta [trade] businesses today\n- Use their business name if known\n- Keep calls under 2 minutes\n- If they say \"not interested\" \u2192 \"Totally fair. Can I at least email you our info? No pressure, you can delete it if it doesn't make sense.\"\n- If they ask about price \u2192 \"We customize based on your lead volume. The audit is free and I'll show you the exact ROI for your business.\"\n- If they want to book \u2192 \"I can send you our calendar link right after this call. When's usually best \u2014 mornings or afternoons?\"\n- Speak at normal pace, not robotic\n- Use casual but professional language",
+  "functions": [
+    {
+      "name": "book_audit",
+      "description": "Send the Calendly booking link to the prospect via text",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "preferred_time": {
+            "type": "string",
+            "enum": [
+              "morning",
+              "afternoon",
+              "evening"
+            ]
+          }
+        },
+        "required": [
+          "email"
+        ]
+      }
+    },
+    {
+      "name": "send_video",
+      "description": "Record that we should send the Loom demo video to this prospect",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      }
+    }
+  ],
+  "webhook": {
+    "url": "{{MAKE_WEBHOOK_URL}}",
+    "events": [
+      "call.completed"
+    ],
+    "payload": {
+      "call_id": "{{call.id}}",
+      "business_name": "{{call.customer.name}}",
+      "contact_name": "{{call.customer.contact_name}}",
+      "phone": "{{call.customer.phone_number}}",
+      "email": "{{call.customer.email}}",
+      "city": "{{call.customer.city}}",
+      "trade": "{{call.customer.trade}}",
+      "call_result": "{{call.result}}",
+      "duration": "{{call.duration}}",
+      "recording_url": "{{call.recording_url}}",
+      "transcript": "{{call.transcript}}",
+      "notes": "{{call.summary}}"
+    }
+  },
+  "call_settings": {
+    "max_duration": 180,
+    "recording_enabled": true,
+    "transcription_enabled": true,
+    "voicemail_action": "leave_message",
+    "voicemail_message": "Hi, this is {{agent_name}} from AG Automation. I was calling about how Alberta trades businesses are losing leads to missed calls. I'd love to send you a quick 2-minute video showing how we fix that. My number is {{callback_number}} \u2014 feel free to call or text back anytime. Have a great day!"
+  }
+}
