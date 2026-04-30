@@ -1,0 +1,51 @@
+
+AG AUTOMATION — END-TO-END TEST CHECKLIST
+=========================================
+
+Before calling REAL leads, verify ALL of these work:
+
+□ TEST 1: VAPI Makes Call
+  - Call your OWN phone
+  - Answer, play along as prospect
+  - Does VAPI respond naturally?
+  - Does it ask for your email?
+
+□ TEST 2: Make.com Catches Webhook
+  - Check Make.com scenario execution log
+  - Did it receive the JSON payload?
+  - Are all fields mapped correctly?
+
+□ TEST 3: GHL Gets Contact
+  - Check GHL Contacts
+  - Did "Test Prospect" appear?
+  - Are custom fields filled (business_name, city, trade)?
+  - Are tags applied (vapi-cold-call)?
+
+□ TEST 4: You Get Notified
+  - Check Telegram/Discord/Slack
+  - Did you get "NEW VAPI LEAD" message?
+  - Does it include business name, contact, result?
+
+□ TEST 5: Welcome SMS Sent
+  - Check your phone (the prospect phone in test)
+  - Did you get SMS within 2 minutes?
+  - Does it include Calendly link?
+
+□ TEST 6: Welcome Email Sent
+  - Check email inbox
+  - Did you get email within 5 minutes?
+  - Does it include Loom video link?
+  - Is it in spam? (Critical — if yes, fix before going live)
+
+□ TEST 7: Google Sheets Backup
+  - Check your backup sheet
+  - Did row appear with all data?
+
+□ TEST 8: Day 1 Follow-Up
+  - Manually trigger Day 1 follow-up
+  - Did email send?
+  - Is content correct?
+
+PASS CRITERIA:
+- All 8 tests pass = GO LIVE
+- Any test fails = STOP, fix before calling real leads
