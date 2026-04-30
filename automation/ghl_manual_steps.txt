@@ -1,0 +1,58 @@
+
+# GoHighLevel — Manual Setup Steps (Cannot be automated via API)
+# ================================================================
+
+These steps MUST be done in the GHL web interface. The GHL API 
+cannot create phone numbers, configure email sending, or set up 
+workflows completely. Follow these in order:
+
+## Step 1: Phone Number Setup
+1. GHL Dashboard → Settings → Phone Numbers
+2. Click "Add Number"
+3. Search: Area code 403 (Calgary) or 780 (Edmonton)
+4. Buy number ($1-2/month, included in your plan)
+5. Verify with your cell phone (they'll call you with code)
+
+## Step 2: Email Sending Setup  
+1. GHL Dashboard → Settings → Email Services
+2. Option A: Connect your domain (recommended)
+   - Add DNS records from GHL to your domain registrar
+   - Wait 24-48 hours for propagation
+3. Option B: Use GHL's shared sending (faster, less professional)
+   - Toggle "Use HighLevel Email" 
+   - Your emails send from @gohighlevel.com
+
+## Step 3: Custom Fields (CRITICAL)
+1. GHL Dashboard → Settings → Custom Fields
+2. Create these fields:
+   - business_name (text)
+   - trade_type (dropdown: plumber, hvac, electrician, roofer, landscaper, painter, drywall, concrete, fencing, garage_doors)
+   - city (text)
+   - lead_source (dropdown: vapi-cold-call, website, referral, linkedin, facebook)
+   - call_result (dropdown: interested, callback, not-interested, voicemail, no-answer)
+   - recording_url (text)
+
+## Step 4: Pipeline Setup
+1. GHL Dashboard → Opportunities → Pipelines
+2. Create pipeline: "AG Automation Sales"
+3. Stages:
+   - New Lead (auto)
+   - Contacted
+   - AI Audit Booked
+   - Proposal Sent
+   - Closed Won
+   - Lost
+4. Set automation triggers on each stage
+
+## Step 5: Workflow Import
+The GHL API cannot fully create workflows. You must build them manually:
+1. GHL Dashboard → Automation → Workflows
+2. Create "VAPI Lead Nurture" workflow
+3. Trigger: Tag "vapi-cold-call" is added
+4. Add steps from ghl_workflows.json (provided in this package)
+
+## Step 6: Test
+1. Add yourself as a contact manually
+2. Tag yourself "vapi-cold-call"
+3. Watch the workflow fire
+4. Check if you get SMS and email within 1 minute
