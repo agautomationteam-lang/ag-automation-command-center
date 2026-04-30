@@ -1,0 +1,129 @@
+{
+  "vapi_lead_nurture": {
+    "name": "VAPI Lead Nurture (14-Day)",
+    "trigger": {
+      "type": "tag_added",
+      "tag": "vapi-cold-call"
+    },
+    "steps": [
+      {
+        "day": 0,
+        "hour": 0,
+        "action": "send_sms",
+        "template": "Hi {{contact.first_name}}, this is {{your_name}} from AG Automation. Here's your AI audit link: {{calendly_link}} \u2014 takes 15 min and I'll show you exactly how many leads you're losing. Any questions, just reply!"
+      },
+      {
+        "day": 0,
+        "hour": 1,
+        "action": "send_email",
+        "subject": "{{custom_values.business_name}} \u2014 Your AI Lead Recovery Video",
+        "template": "welcome_email_html"
+      },
+      {
+        "day": 1,
+        "hour": 10,
+        "action": "send_email",
+        "subject": "How {{custom_values.city}} {{custom_values.trade_type}} businesses recover 40% more leads",
+        "template": "case_study_email"
+      },
+      {
+        "day": 3,
+        "hour": 10,
+        "action": "send_sms",
+        "template": "Hey {{contact.first_name}}, just checking if you got the AI audit link? Still have a few slots open this week. {{calendly_link}}"
+      },
+      {
+        "day": 7,
+        "hour": 10,
+        "action": "send_email",
+        "subject": "Last chance: Free AI audit for {{custom_values.business_name}}",
+        "template": "last_chance_email"
+      },
+      {
+        "day": 14,
+        "hour": 10,
+        "action": "send_sms",
+        "template": "Hi {{contact.first_name}}, quick question \u2014 are you still looking to fix your missed calls this month? If not, no worries, I'll check back next quarter. -{{your_name}}"
+      }
+    ]
+  },
+  "new_client_onboarding": {
+    "name": "New Client Onboarding",
+    "trigger": {
+      "type": "pipeline_stage_changed",
+      "from": "Proposal Sent",
+      "to": "Closed Won"
+    },
+    "steps": [
+      {
+        "hour": 0,
+        "action": "send_sms",
+        "template": "\ud83c\udf89 Welcome to AG Automation! Your onboarding questionnaire: {{tally_link}} + kickoff call: {{calendly_kickoff_link}}"
+      },
+      {
+        "hour": 1,
+        "action": "create_task",
+        "assigned_to": "{{your_user_id}}",
+        "title": "Build automation for {{contact.business_name}}",
+        "due": "5 business days"
+      },
+      {
+        "day": 1,
+        "hour": 9,
+        "action": "send_email",
+        "subject": "Next steps for {{custom_values.business_name}} \u2014 Let's get you live in 5 days",
+        "template": "onboarding_email"
+      },
+      {
+        "day": 5,
+        "hour": 14,
+        "action": "send_sms",
+        "template": "{{contact.first_name}}, your system is ready! Training call scheduled for {{training_time}}. See you then!"
+      },
+      {
+        "day": 30,
+        "hour": 10,
+        "action": "send_sms",
+        "template": "Hi {{contact.first_name}}, how's the lead capture going? Any questions or tweaks needed? Reply here or call {{your_phone}}."
+      },
+      {
+        "day": 30,
+        "hour": 10,
+        "action": "send_email",
+        "subject": "Quick check-in + Google review request",
+        "template": "review_request_email"
+      },
+      {
+        "day": 45,
+        "hour": 10,
+        "action": "send_sms",
+        "template": "Hi {{contact.first_name}}, quick favor \u2014 do you know any other {{custom_values.trade_type}} businesses in Alberta that might need this? I offer a free month for every referral that signs up. No pressure, just thought I'd ask!"
+      }
+    ]
+  },
+  "monthly_report": {
+    "name": "Monthly Client Report",
+    "trigger": {
+      "type": "recurring",
+      "schedule": "1st of month at 9:00 AM"
+    },
+    "steps": [
+      {
+        "action": "generate_report",
+        "template": "monthly_metrics",
+        "include": [
+          "leads_captured",
+          "leads_converted",
+          "calls_missed_then_recovered",
+          "reviews_generated",
+          "revenue_impact"
+        ]
+      },
+      {
+        "action": "send_email",
+        "subject": "{{custom_values.business_name}} \u2014 Monthly AI Report ({{month_year}})",
+        "template": "monthly_report_email"
+      }
+    ]
+  }
+}
