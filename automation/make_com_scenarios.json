@@ -1,0 +1,178 @@
+{
+  "scenario_1_vapi_to_ghl": {
+    "name": "AG: VAPI Lead Capture \u2192 GHL + Notify",
+    "description": "When VAPI completes a call, add lead to GHL, send you notification, backup to Google Sheets",
+    "trigger": {
+      "type": "webhook",
+      "name": "VAPI Call Completed",
+      "url": "{{MAKE_WEBHOOK_URL}}",
+      "method": "POST",
+      "data_structure": {
+        "call_id": "string",
+        "business_name": "string",
+        "contact_name": "string",
+        "phone": "string",
+        "email": "string",
+        "city": "string",
+        "trade": "string",
+        "call_result": "string",
+        "duration": "number",
+        "recording_url": "string",
+        "transcript": "string",
+        "notes": "string"
+      }
+    },
+    "modules": [
+      {
+        "order": 1,
+        "name": "Add to GHL CRM",
+        "type": "http_request",
+        "method": "POST",
+        "url": "https://rest.gohighlevel.com/v1/contacts/",
+        "headers": {
+          "Authorization": "Bearer {{GHL_API_KEY}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "firstName": "{{contact_name.split(' ')[0]}}",
+          "lastName": "{{contact_name.split(' ')[1] or ''}}",
+          "email": "{{email}}",
+          "phone": "{{phone}}",
+          "tags": [
+            "vapi-cold-call",
+            "{{trade}}",
+            "{{city}}",
+            "{{call_result}}"
+          ],
+          "customField": {
+            "business_name": "{{business_name}}",
+            "lead_source": "VAPI Cold Call",
+            "call_result": "{{call_result}}",
+            "recording_url": "{{recording_url}}",
+            "call_duration": "{{duration}}",
+            "trade_type": "{{trade}}",
+            "city": "{{city}}"
+          }
+        }
+      },
+      {
+        "order": 2,
+        "name": "Send YOU Notification (Telegram/Discord/Slack)",
+        "type": "http_request",
+        "method": "POST",
+        "url": "{{NOTIFICATION_WEBHOOK_URL}}",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "text": "\ud83d\udd25 NEW VAPI LEAD\n\nBusiness: {{business_name}}\nContact: {{contact_name}}\nCity: {{city}} | Trade: {{trade}}\nResult: {{call_result}}\nEmail: {{email}}\nPhone: {{phone}}\n\nRecording: {{recording_url}}\n\nAction needed: Follow up within 2 hours!"
+        }
+      },
+      {
+        "order": 3,
+        "name": "Add to Google Sheets Backup",
+        "type": "google_sheets",
+        "spreadsheet_id": "{{GOOGLE_SHEET_ID}}",
+        "sheet_name": "VAPI Leads",
+        "row_values": [
+          "{{now}}",
+          "{{business_name}}",
+          "{{contact_name}}",
+          "{{email}}",
+          "{{phone}}",
+          "{{city}}",
+          "{{trade}}",
+          "{{call_result}}",
+          "{{duration}}",
+          "{{recording_url}}",
+          "NOT_CONTACTED"
+        ]
+      }
+    ]
+  },
+  "scenario_2_welcome_sequence": {
+    "name": "AG: Welcome Sequence (SMS + Email)",
+    "description": "When new lead enters GHL from VAPI, send welcome SMS and email immediately",
+    "trigger": {
+      "type": "ghl_webhook",
+      "event": "contact.created",
+      "filter": "tag contains 'vapi-cold-call'"
+    },
+    "modules": [
+      {
+        "order": 1,
+        "name": "Wait 30 seconds",
+        "type": "sleep",
+        "duration": 30
+      },
+      {
+        "order": 2,
+        "name": "Send Welcome SMS via GHL",
+        "type": "ghl_sms",
+        "location_id": "{{GHL_LOCATION_ID}}",
+        "phone": "{{contact.phone}}",
+        "message": "Hi {{contact.firstName}}, this is {{your_name}} from AG Automation. Thanks for your time today! Here's your AI audit link: {{calendly_link}} Any questions, just reply. -{{your_name}}"
+      },
+      {
+        "order": 3,
+        "name": "Send Welcome Email via GHL",
+        "type": "ghl_email",
+        "location_id": "{{GHL_LOCATION_ID}}",
+        "to": "{{contact.email}}",
+        "subject": "{{contact.customField.business_name}} \u2014 Your AI Lead Recovery Video",
+        "body_html": "<html>\n<body style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;\">\n<h2>Hi {{contact.firstName}},</h2>\n<p>Thanks for taking my call today. As promised, here's the 2-minute video showing how Alberta {{contact.customField.trade_type}} businesses recover 40% of lost leads:</p>\n<p><a href=\"{{loom_link}}\" style=\"background:#0891b2;color:#fff;padding:12px 24px;text-decoration:none;border-radius:6px;display:inline-block;\">\u25b6 Watch the Video</a></p>\n<p>After watching, if you want to see exactly how many leads <strong>{{contact.customField.business_name}}</strong> is losing, book your free 15-minute AI audit:</p>\n<p><a href=\"{{calendly_link}}\" style=\"background:#10b981;color:#fff;padding:12px 24px;text-decoration:none;border-radius:6px;display:inline-block;\">\ud83d\udcc5 Book My Free Audit</a></p>\n<p>During the audit, I'll show you:</p>\n<ul>\n<li>How many leads you lose per week (exact number)</li>\n<li>What that's costing you monthly</li>\n<li>How our system recovers them automatically</li>\n<li>The exact ROI for your business</li>\n</ul>\n<p>No obligation. No pressure. Just numbers.</p>\n<p>Questions? Reply to this email or text me at {{your_phone}}.</p>\n<p>Best,<br>{{your_name}}<br>AG Automation</p>\n</body>\n</html>"
+      }
+    ]
+  },
+  "scenario_3_content_factory": {
+    "name": "AG: Content Factory",
+    "description": "When you upload a Loom video, auto-generate LinkedIn posts, tweets, and blog summary",
+    "trigger": {
+      "type": "webhook",
+      "name": "Loom Video Uploaded",
+      "manual_trigger": true
+    },
+    "modules": [
+      {
+        "order": 1,
+        "name": "Send to Claude for Content Generation",
+        "type": "http_request",
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "headers": {
+          "Authorization": "Bearer {{OPENAI_KEY}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "model": "gpt-4o-mini",
+          "messages": [
+            {
+              "role": "system",
+              "content": "You are a content writer for AG Automation, an AI agency serving Alberta trades businesses. Write in short paragraphs, include specific numbers, use confident tone."
+            },
+            {
+              "role": "user",
+              "content": "Based on this video about AI for trades businesses, write: 1) A LinkedIn post (150 words), 2) A Twitter thread (3 tweets), 3) A blog excerpt (200 words). Video topic: {{video_topic}}"
+            }
+          ]
+        }
+      },
+      {
+        "order": 2,
+        "name": "Save to Google Docs",
+        "type": "google_docs",
+        "title": "Content Batch {{now.format('YYYY-MM-DD')}}",
+        "body": "{{ Claude output }}"
+      },
+      {
+        "order": 3,
+        "name": "Notify You",
+        "type": "http_request",
+        "url": "{{NOTIFICATION_WEBHOOK_URL}}",
+        "body": {
+          "text": "\u270d\ufe0f Content batch ready! Check Google Docs."
+        }
+      }
+    ]
+  }
+}
